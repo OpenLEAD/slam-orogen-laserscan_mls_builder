@@ -1,0 +1,11 @@
+<package>
+  <description brief="Pointcloud of laserscan samples. Influenced by system pose.">
+  
+  </description>
+  <author>/</author>
+  <license></license>
+  <url>http://</url>
+  <logo>http://</logo>
+  <depend package="base/types" />
+  <depend package="image_processing/orogen/structured_light" />
+</package>
