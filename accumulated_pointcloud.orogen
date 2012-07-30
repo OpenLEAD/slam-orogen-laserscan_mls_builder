@@ -15,6 +15,8 @@ import_types_from "base"
 # The corresponding C++ class can be edited in tasks/Task.hpp and
 # tasks/Task.cpp, and will be put in the accumulated_pointcloud namespace.
 task_context "Task" do
+    #needs_configuration
+
    # A configuration property (here, a std::string). Its value can be retrieved
    # in the C++ code with # _config_value.get() and _config_value.set(new_value).
    #property "config_value", "/std/string"
@@ -35,6 +37,15 @@ task_context "Task" do
    # Data can be written using _output.write(value). _output.connected() returns
    # if this output is connected to an input or not.
    #output_port "output", "int"
+
+    ##########################
+    # transformer parameters
+    ##########################
+    #transformer do
+    #    transformation("laser", "body") # TODO correct transformation?
+    #    align_port('laserscan', 0.1)
+    #    max_latency(1)
+    #end
 
    # If you want that component's updateHook() to be executed when the "input"
    # port gets data, uncomment this

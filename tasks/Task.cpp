@@ -24,12 +24,12 @@ Task::~Task()
 // hooks defined by Orocos::RTT. See Task.hpp for more detailed
 // documentation about them.
 
-// bool Task::configureHook()
-// {
-//     if (! TaskBase::configureHook())
-//         return false;
-//     return true;
-// }
+bool Task::configureHook()
+{
+    if (! TaskBase::configureHook())
+        return false;
+    return true;
+}
 // bool Task::startHook()
 // {
 //     if (! TaskBase::startHook())
@@ -47,6 +47,8 @@ void Task::updateHook()
     while (_laserscan.read(laserscan) == RTT::NewData)
     {
         // Got a new laserscan sample, do something with it.
+
+	
 
 	// Get motor angles.
         _rad_pos_hb1.read(rad_pos_hb1);
