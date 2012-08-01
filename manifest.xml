@@ -7,5 +7,7 @@
   <url>http://</url>
   <logo>http://</logo>
   <depend package="base/types" />
-  <depend package="image_processing/orogen/structured_light" />
+  <depend package="slam/envire"/>
+  <depend package="slam/orogen/envire"/>
+ <!-- <depend package="image_processing/orogen/structured_light" /> -->
 </package>

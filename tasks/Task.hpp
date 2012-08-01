@@ -4,6 +4,10 @@
 #define ACCUMULATED_POINTCLOUD_TASK_TASK_HPP
 
 #include "accumulated_pointcloud/TaskBase.hpp"
+#include <boost/shared_ptr.hpp>
+#include <envire/Core.hpp>
+#include <envire/maps/Pointcloud.hpp>
+#include <envire/Orocos.hpp>
 
 namespace accumulated_pointcloud {
 
@@ -25,7 +29,10 @@ namespace accumulated_pointcloud {
     {
 	friend class TaskBase;
     protected:
-
+        boost::shared_ptr<envire::Environment> env;
+        boost::shared_ptr<envire::Pointcloud> envire_pointcloud;
+        envire::OrocosEmitter* orocosEmitter;
+        base::Time lastEnvireDataUpdate;
 
 
     public:
@@ -33,14 +40,14 @@ namespace accumulated_pointcloud {
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
          * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
          */
-        Task(std::string const& name = "accumulated_pointcloud::Task", TaskCore::TaskState initial_state = Stopped);
+        Task(std::string const& name = "accumulated_pointcloud::Task");
 
         /** TaskContext constructor for Task 
          * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices. 
          * \param engine The RTT Execution engine to be used for this task, which serialises the execution of all commands, programs, state machines and incoming events for a task. 
          * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
          */
-        Task(std::string const& name, RTT::ExecutionEngine* engine, TaskCore::TaskState initial_state = Stopped);
+        Task(std::string const& name, RTT::ExecutionEngine* engine);
 
         /** Default deconstructor of Task
          */
@@ -60,14 +67,14 @@ namespace accumulated_pointcloud {
          end
          \endverbatim
          */
-       bool configureHook();
+       //bool configureHook();
 
         /** This hook is called by Orocos when the state machine transitions
          * from Stopped to Running. If it returns false, then the component will
          * stay in Stopped. Otherwise, it goes into Running and updateHook()
          * will be called.
          */
-        // bool startHook();
+        bool startHook();
 
         /** This hook is called by Orocos when the component is in the Running
          * state, at each activity step. Here, the activity gives the "ticks"
@@ -96,13 +103,15 @@ namespace accumulated_pointcloud {
         /** This hook is called by Orocos when the state machine transitions
          * from Running to Stopped after stop() has been called.
          */
-        // void stopHook();
+        void stopHook();
 
         /** This hook is called by Orocos when the state machine transitions
          * from Stopped to PreOperational, requiring the call to configureHook()
          * before calling start() again.
          */
         // void cleanupHook();
+        
+        void laserscanTransformerCallback(base::Time const& timestamp, base::samples::LaserScan const& sample);
     };
 }
 

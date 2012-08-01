@@ -30,7 +30,7 @@ include Orocos
 Orocos.initialize
 
 Orocos.transformer.load_conf(File.join("#{ENV['AUTOPROJ_PROJECT_BASE']}","csurvey","run_scripts","resources","transforms.rb"))
-Orocos.run "accumulated_pointcloud", "structured_light", "transformer::Task" => "transformer_broadcaster" do
+Orocos.run "accumulated_pointcloud_test", "structured_light", "transformer::Task" => "transformer_broadcaster" do
 
     #camera.frame.connect_to structured_light.frame, :type => :buffer,:size => 10
     #log....
