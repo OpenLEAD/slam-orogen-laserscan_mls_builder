@@ -7,6 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #include <envire/Core.hpp>
 #include <envire/maps/Pointcloud.hpp>
+#include <envire/maps/MLSGrid.hpp>
+#include <envire/operators/MLSProjection.hpp>
 #include <envire/Orocos.hpp>
 
 namespace accumulated_pointcloud {
@@ -31,9 +33,14 @@ namespace accumulated_pointcloud {
     protected:
         boost::shared_ptr<envire::Environment> env;
         boost::shared_ptr<envire::Pointcloud> envire_pointcloud;
+        boost::shared_ptr<envire::MLSProjection> projection;
+        boost::shared_ptr<envire::MultiLevelSurfaceGrid> mls_grid;
         envire::OrocosEmitter* orocosEmitter;
         base::Time lastEnvireDataUpdate;
 
+        
+    protected:
+        void setupMLSGrid(double angular_resolution, double sensor2grid_distance);
 
     public:
         /** TaskContext constructor for Task

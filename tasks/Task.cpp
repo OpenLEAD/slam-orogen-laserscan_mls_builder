@@ -30,7 +30,14 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     std::vector<Eigen::Vector3d> points;
     sample.convertScanToPointCloud(points, body2world * laser2body, true);
     std::copy( points.begin(), points.end(), std::back_inserter( envire_pointcloud->vertices ) );
-    env->itemModified(envire_pointcloud.get());
+    if(_show_mls_grid)
+    {
+        if(!mls_grid)
+            setupMLSGrid(sample.angular_resolution, std::abs(body2world.translation().z()));
+        projection->updateAll();
+    }
+    else
+        env->itemModified(envire_pointcloud.get());
     
     // write out point cloud area of interest
     if(_point_cloud.connected())
@@ -41,6 +48,22 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
         std::copy( envire_pointcloud->vertices.begin(), envire_pointcloud->vertices.end(), std::back_inserter( point_cloud.points ) );
         _point_cloud.write(point_cloud);
     }
+}
+void Task::setupMLSGrid(double angular_resolution, double sensor2grid_distance)
+{
+    double cell_size = sensor2grid_distance * tan(angular_resolution);
+    double grid_count_x = _grid_size_x / (cell_size * _cell_resolution_x);
+    double grid_count_y = _grid_size_y / (cell_size * _cell_resolution_y);
+    
+    if(mls_grid)
+        mls_grid->detach();
+    if(projection)
+        projection->detach();
+    projection = boost::shared_ptr<envire::MLSProjection>(new envire::MLSProjection());
+    mls_grid = boost::shared_ptr<envire::MultiLevelSurfaceGrid>(new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, cell_size * _cell_resolution_x, cell_size * _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y));
+    env->attachItem(mls_grid.get());
+    env->addInput(projection.get(), envire_pointcloud.get());
+    env->addOutput(projection.get(), mls_grid.get());
 }
 
 /// The following lines are template definitions for the various state machine
