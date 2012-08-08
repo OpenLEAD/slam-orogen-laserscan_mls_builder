@@ -9,5 +9,4 @@
   <depend package="base/types" />
   <depend package="slam/envire"/>
   <depend package="slam/orogen/envire"/>
- <!-- <depend package="image_processing/orogen/structured_light" /> -->
 </package>

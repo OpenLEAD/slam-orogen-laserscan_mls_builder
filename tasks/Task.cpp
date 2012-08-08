@@ -20,20 +20,17 @@ Task::~Task()
 
 void Task::laserscanTransformerCallback(base::Time const& timestamp, base::samples::LaserScan const& sample)
 {
-    Eigen::Affine3d laser2body;
-    if (!_laser2body.get(timestamp, laser2body, false))
-        return;
-    Eigen::Affine3d body2world;
-    if (!_body2world.get(timestamp, body2world, false))
+    Eigen::Affine3d laser2world;
+    if (!_laser2world.get(timestamp, laser2world, false))
         return;
     
     std::vector<Eigen::Vector3d> points;
-    sample.convertScanToPointCloud(points, body2world * laser2body, true);
+    sample.convertScanToPointCloud(points, laser2world, true);
     std::copy( points.begin(), points.end(), std::back_inserter( envire_pointcloud->vertices ) );
     if(_show_mls_grid)
     {
         if(!mls_grid)
-            setupMLSGrid(sample.angular_resolution, std::abs(body2world.translation().z()));
+            setupMLSGrid(sample.angular_resolution, std::abs(laser2world.translation().z()));
         projection->updateAll();
     }
     else

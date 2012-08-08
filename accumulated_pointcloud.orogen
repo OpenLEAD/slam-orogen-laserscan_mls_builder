@@ -36,8 +36,7 @@ task_context "Task" do
     # transformer parameters
     ##########################
     transformer do
-        transformation("laser", "body") # TODO correct transformation?
-        transformation("body", "world")
+        transformation("laser", "world")
         align_port('laserscan', 0.1)
         max_latency(1)
     end
