@@ -7,7 +7,6 @@ import_types_from "base"
 import_types_from 'envire'
 
 task_context "Task" do
-    #needs_configuration
 
     property('envire_period', 'double', 1.0).
         doc 'update period in s for the envire_data port.'
@@ -38,7 +37,7 @@ task_context "Task" do
     transformer do
         transformation("laser", "world")
         align_port('laserscan', 0.1)
-        max_latency(1)
+        max_latency(20)
     end
 
     port_driven "laserscan"

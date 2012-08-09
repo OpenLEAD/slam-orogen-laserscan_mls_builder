@@ -22,7 +22,10 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
 {
     Eigen::Affine3d laser2world;
     if (!_laser2world.get(timestamp, laser2world, false))
+    {
+        std::cerr << "skip, have no transformation sample!" << std::endl;
         return;
+    }
     
     std::vector<Eigen::Vector3d> points;
     sample.convertScanToPointCloud(points, laser2world, true);
