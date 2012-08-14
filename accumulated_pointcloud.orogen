@@ -18,10 +18,10 @@ task_context "Task" do
         doc 'x size of the grid in meter'
     property('grid_size_y', 'double', 10.0).
         doc 'y size of the grid in meter'
-    property('cell_resolution_x', 'double', 1.0).
-        doc 'cell resolution in relation to the angular resolution of the laser'
-    property('cell_resolution_y', 'double', 1.0).
-        doc 'cell resolution in relation to the angular resolution of the laser'
+    property('cell_resolution_x', 'double', 0.02).
+        doc 'x cell resolution in meter'
+    property('cell_resolution_y', 'double', 0.02).
+        doc 'y cell resolution in meter'
 
     input_port("laserscan", "base::samples::LaserScan").
         needs_reliable_connection.

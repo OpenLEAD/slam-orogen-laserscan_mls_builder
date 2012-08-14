@@ -28,6 +28,14 @@ if log
         accumulated_pointcloud = TaskContext.get 'accumulated_pointcloud'
         # show mls grid
         accumulated_pointcloud.show_mls_grid = true
+        # x size of the grid in meter
+        accumulated_pointcloud.grid_size_x = 10
+        # y size of the grid in meter
+        accumulated_pointcloud.grid_size_y = 10
+        # x cell resolution in meter
+        accumulated_pointcloud.cell_resolution_x = 0.02
+        # y cell resolution in meter
+        accumulated_pointcloud.cell_resolution_y = 0.02
 
         ## connect ports
         log.profiling.profiling_scan.connect_to accumulated_pointcloud.laserscan, :type => :buffer, :size => 100

@@ -33,7 +33,7 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     if(_show_mls_grid)
     {
         if(!mls_grid)
-            setupMLSGrid(sample.angular_resolution, std::abs(laser2world.translation().z()));
+            setupMLSGrid();
         projection->updateAll();
     }
     else
@@ -49,18 +49,18 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
         _point_cloud.write(point_cloud);
     }
 }
-void Task::setupMLSGrid(double angular_resolution, double sensor2grid_distance)
+
+void Task::setupMLSGrid()
 {
-    double cell_size = sensor2grid_distance * tan(angular_resolution);
-    double grid_count_x = _grid_size_x / (cell_size * _cell_resolution_x);
-    double grid_count_y = _grid_size_y / (cell_size * _cell_resolution_y);
+    double grid_count_x = _grid_size_x / _cell_resolution_x;
+    double grid_count_y = _grid_size_y / _cell_resolution_y;
     
     if(mls_grid)
         mls_grid->detach();
     if(projection)
         projection->detach();
     projection = boost::shared_ptr<envire::MLSProjection>(new envire::MLSProjection());
-    mls_grid = boost::shared_ptr<envire::MultiLevelSurfaceGrid>(new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, cell_size * _cell_resolution_x, cell_size * _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y));
+    mls_grid = boost::shared_ptr<envire::MultiLevelSurfaceGrid>(new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y));
     env.attachItem(mls_grid.get());
     env.addInput(projection.get(), envire_pointcloud.get());
     env.addOutput(projection.get(), mls_grid.get());

@@ -40,7 +40,7 @@ namespace accumulated_pointcloud {
 
         
     protected:
-        void setupMLSGrid(double angular_resolution, double sensor2grid_distance);
+        void setupMLSGrid();
 
     public:
         /** TaskContext constructor for Task
