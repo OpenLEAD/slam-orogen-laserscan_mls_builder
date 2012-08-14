@@ -129,6 +129,9 @@ void Task::stopHook()
 {
     TaskBase::stopHook();
     
+    if(_envire_path.get() != "")
+        env.serialize(_envire_path);
+    
     delete orocosEmitter;
     orocosEmitter = NULL;
 }

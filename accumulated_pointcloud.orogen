@@ -10,6 +10,8 @@ task_context "Task" do
 
     property('envire_period', 'double', 1.0).
         doc 'update period in s for the envire_data port.'
+    property('envire_path', 'string', "").
+        doc 'enter a path if the environment should be saved'
         
     ## MLS Grid properies ##
     property('show_mls_grid', 'bool', false).

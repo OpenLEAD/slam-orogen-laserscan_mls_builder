@@ -102,6 +102,8 @@ elsif Ping.pingecho("192.168.128.12",0.5)
             accumulated_pointcloud = TaskContext.get 'accumulated_pointcloud'
             # show mls grid
             accumulated_pointcloud.show_mls_grid = true
+            # a path were the envirement can be saved
+            accumulated_pointcloud.envire_path = "#{ENV['AUTOPROJ_PROJECT_BASE']}/csurvey/orogen/accumulated_pointcloud/env/"
 
             ## setup transformer broadcaster
             broadcaster = Orocos::TaskContext.get "transformer_broadcaster"
