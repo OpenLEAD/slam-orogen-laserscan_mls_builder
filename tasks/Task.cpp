@@ -37,7 +37,7 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
         projection->updateAll();
     }
     else
-        env->itemModified(envire_pointcloud.get());
+        env.itemModified(envire_pointcloud.get());
     
     // write out point cloud area of interest
     if(_point_cloud.connected())
@@ -61,9 +61,9 @@ void Task::setupMLSGrid(double angular_resolution, double sensor2grid_distance)
         projection->detach();
     projection = boost::shared_ptr<envire::MLSProjection>(new envire::MLSProjection());
     mls_grid = boost::shared_ptr<envire::MultiLevelSurfaceGrid>(new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, cell_size * _cell_resolution_x, cell_size * _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y));
-    env->attachItem(mls_grid.get());
-    env->addInput(projection.get(), envire_pointcloud.get());
-    env->addOutput(projection.get(), mls_grid.get());
+    env.attachItem(mls_grid.get());
+    env.addInput(projection.get(), envire_pointcloud.get());
+    env.addOutput(projection.get(), mls_grid.get());
 }
 
 /// The following lines are template definitions for the various state machine
@@ -82,9 +82,8 @@ bool Task::startHook()
     if (! TaskBase::startHook())
         return false;
     
-    env = boost::shared_ptr<envire::Environment>(new envire::Environment());
     envire_pointcloud = boost::shared_ptr<envire::Pointcloud>(new envire::Pointcloud());
-    env->attachItem(envire_pointcloud.get());
+    env.attachItem(envire_pointcloud.get());
     
     orocosEmitter = NULL;
     
@@ -98,9 +97,9 @@ void Task::updateHook()
         // register the binary event dispatcher, 
         // which will write envire data to a port
         orocosEmitter = new envire::OrocosEmitter( _envire_data );
-        orocosEmitter->useContextUpdates( env.get() );
+        orocosEmitter->useContextUpdates( &env );
         orocosEmitter->useEventQueue( true );
-        orocosEmitter->attach( env.get() );
+        orocosEmitter->attach( &env );
     }
     TaskBase::updateHook();
 

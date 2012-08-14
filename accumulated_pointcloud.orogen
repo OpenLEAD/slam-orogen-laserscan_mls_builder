@@ -36,8 +36,8 @@ task_context "Task" do
     ##########################
     transformer do
         transformation("laser", "world")
-        align_port('laserscan', 0.1)
-        max_latency(20)
+        align_port('laserscan', 0.4)
+        max_latency(3.0)
     end
 
     port_driven "laserscan"
@@ -47,8 +47,6 @@ deployment "accumulated_pointcloud_test" do
     # This is a test deployment that should not be installed
     do_not_install
 
-    # Declares it as periodic, with a period of 100ms
-    task("accumulated_pointcloud", "Task").
-        periodic(0.1)
+    task("accumulated_pointcloud", "Task")
 end
 

@@ -31,7 +31,7 @@ namespace accumulated_pointcloud {
     {
 	friend class TaskBase;
     protected:
-        boost::shared_ptr<envire::Environment> env;
+        envire::Environment env;
         boost::shared_ptr<envire::Pointcloud> envire_pointcloud;
         boost::shared_ptr<envire::MLSProjection> projection;
         boost::shared_ptr<envire::MultiLevelSurfaceGrid> mls_grid;
