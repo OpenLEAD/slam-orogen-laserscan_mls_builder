@@ -36,6 +36,10 @@ if log
         accumulated_pointcloud.cell_resolution_x = 0.02
         # y cell resolution in meter
         accumulated_pointcloud.cell_resolution_y = 0.02
+        # true if laser scan should be filtered
+        accumulated_pointcloud.filter_laserscan = true
+        # filter: bounding box of the sensor in meter
+        accumulated_pointcloud.sensor_bounding_box = 1.0
 
         ## connect ports
         log.profiling.profiling_scan.connect_to accumulated_pointcloud.laserscan, :type => :buffer, :size => 100
@@ -81,7 +85,7 @@ elsif Ping.pingecho("192.168.128.12",0.5)
             # angular resolution [min. 0.225°]
             config.angular_resolution.rad = 0.00393 #0.0157 #0.007854
             # max. scan distance
-            config.max_distance = 2.0
+            config.max_distance = 2.5
             # min. scan distance
             config.min_distance = 0.1
             # speed of sound in water

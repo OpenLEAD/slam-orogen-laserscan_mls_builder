@@ -41,6 +41,16 @@ namespace accumulated_pointcloud {
         
     protected:
         void setupMLSGrid();
+        
+        /**
+         * Removes outliers in a laser scan.
+         * \param window_size Size of the window used to compute the mean and sigma.
+         * \param scan The laser scan, its parameter minRange is used as bounding box of the sensor.
+         * \param sensor_sigma Minimum sigma in meter given by the uncertainty of the sensor.
+         * \param min_density Minimum density of range samples a window should have.
+         */
+        void filterLaserScan(unsigned int window_size, base::samples::LaserScan& scan, double sensor_sigma = 0.0, double min_density = 0.8);
+        
 
     public:
         /** TaskContext constructor for Task

@@ -24,6 +24,12 @@ task_context "Task" do
         doc 'x cell resolution in meter'
     property('cell_resolution_y', 'double', 0.02).
         doc 'y cell resolution in meter'
+    property('sensor_uncertainty', 'double', 0.017453293).
+        doc 'uncertainty of the laser scan'
+    property('filter_laserscan', 'bool', false).
+        doc 'true if laser scan should be filtered'
+    property('sensor_bounding_box', 'double', 0.5).
+        doc 'filter: bounding box of the sensor in meter'
 
     input_port("laserscan", "base::samples::LaserScan").
         needs_reliable_connection.
