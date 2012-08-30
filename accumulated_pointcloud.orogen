@@ -16,6 +16,8 @@ task_context "Task" do
     ## MLS Grid properies ##
     property('show_mls_grid', 'bool', false).
         doc 'show a mls grid instead of a pointcloud'
+    property('show_elevation_grid', 'bool', false).
+        doc 'show a mls grid instead of a pointcloud'
     property('grid_size_x', 'double', 10.0).
         doc 'x size of the grid in meter'
     property('grid_size_y', 'double', 10.0).

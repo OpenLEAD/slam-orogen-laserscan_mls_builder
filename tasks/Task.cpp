@@ -4,6 +4,8 @@
 
 #include <envire/maps/MLSGrid.hpp>
 #include <envire/operators/MLSProjection.hpp>
+#include <envire/maps/Grids.hpp>
+#include <envire/operators/Projection.hpp>
 
 using namespace accumulated_pointcloud;
 
@@ -123,19 +125,28 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
         uncertainty.push_back(_sensor_uncertainty.get());
     
     // update visualization of mls grid or pointcloud
-    if(_show_mls_grid)
+    if(_show_mls_grid || _show_elevation_grid)
     {
         if(projections.empty())
         {
             double grid_count_x = _grid_size_x / _cell_resolution_x;
             double grid_count_y = _grid_size_y / _cell_resolution_y;
-
-            EnvireProjection projection(envire_pointcloud.get(), 
-                        new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y), 
-                        new envire::MLSProjection());
-            projections.push_back(projection);
-            setupProjection(laser2world * Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitY())), projection);
-
+            if(_show_mls_grid)
+            {
+                EnvireProjection projection(envire_pointcloud.get(),
+                            new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y),
+                            new envire::MLSProjection());
+                projections.push_back(projection);
+                setupProjection(laser2world * Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitY())), projection);
+            }
+            else
+            {
+                EnvireProjection projection(envire_pointcloud.get(),
+                                            new envire::ElevationGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y),
+                                            new envire::Projection());
+                projections.push_back(projection);
+                setupProjection(laser2world * Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitY())), projection);
+            }
         }
         for(std::vector<EnvireProjection>::iterator it = projections.begin(); it != projections.end(); it++)
         {

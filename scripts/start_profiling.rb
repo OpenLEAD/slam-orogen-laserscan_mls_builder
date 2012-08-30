@@ -29,19 +29,21 @@ if log
         ## setup accumulated pointcloud task
         accumulated_pointcloud = TaskContext.get 'accumulated_pointcloud'
         # show mls grid
-        accumulated_pointcloud.show_mls_grid = true
+        accumulated_pointcloud.show_mls_grid = false
+        # show elevation grid
+        accumulated_pointcloud.show_elevation_grid = true
         # x size of the grid in meter
         accumulated_pointcloud.grid_size_x = 10
         # y size of the grid in meter
         accumulated_pointcloud.grid_size_y = 10
         # x cell resolution in meter
-        accumulated_pointcloud.cell_resolution_x = 0.02
+        accumulated_pointcloud.cell_resolution_x = 0.04
         # y cell resolution in meter
-        accumulated_pointcloud.cell_resolution_y = 0.02
+        accumulated_pointcloud.cell_resolution_y = 0.04
         # true if laser scan should be filtered
         accumulated_pointcloud.filter_laserscan = true
         # filter: bounding box of the sensor in meter
-        accumulated_pointcloud.sensor_bounding_box = 1.0
+        accumulated_pointcloud.sensor_bounding_box = 0.2
 
         ## connect ports
         log.profiling.profiling_scan.connect_to accumulated_pointcloud.laserscan, :type => :buffer, :size => 100
@@ -119,7 +121,7 @@ elsif Ping.pingecho("192.168.128.12",0.5)
             ## setup accumulated pointcloud task
             accumulated_pointcloud = TaskContext.get 'accumulated_pointcloud'
             # show mls grid
-            accumulated_pointcloud.show_mls_grid = true
+            accumulated_pointcloud.show_mls_grid = false
             # a path were the envirement can be saved
             accumulated_pointcloud.envire_path = "#{ENV['AUTOPROJ_PROJECT_BASE']}/csurvey/orogen/accumulated_pointcloud/env/"
 
