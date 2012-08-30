@@ -7,12 +7,20 @@
 #include <boost/shared_ptr.hpp>
 #include <envire/Core.hpp>
 #include <envire/maps/Pointcloud.hpp>
-#include <envire/maps/MLSGrid.hpp>
-#include <envire/operators/MLSProjection.hpp>
 #include <envire/Orocos.hpp>
 
 namespace accumulated_pointcloud {
 
+    struct EnvireProjection
+    {
+        envire::Pointcloud* source_pointcloud;
+        envire::CartesianMap* target_map;
+        envire::Operator* op;
+        EnvireProjection() : source_pointcloud(NULL), target_map(NULL), op(NULL) {};
+        EnvireProjection(envire::Pointcloud* pointcloud, envire::CartesianMap* map, envire::Operator* op) 
+            : source_pointcloud(pointcloud), target_map(map), op(op) {};
+    };
+    
     /*! \class Task 
      * \brief The task context provides and requires services. It uses an ExecutionEngine to perform its functions.
      * Essential interfaces are operations, data flow ports and properties. These interfaces have been defined using the oroGen specification.
@@ -33,14 +41,13 @@ namespace accumulated_pointcloud {
     protected:
         envire::Environment env;
         boost::shared_ptr<envire::Pointcloud> envire_pointcloud;
-        boost::shared_ptr<envire::MLSProjection> projection;
-        boost::shared_ptr<envire::MultiLevelSurfaceGrid> mls_grid;
+        std::vector<EnvireProjection> projections;
         envire::OrocosEmitter* orocosEmitter;
         base::Time lastEnvireDataUpdate;
 
         
     protected:
-        void setupMLSGrid();
+        void setupProjection(const Eigen::Affine3d &transform, EnvireProjection &projection);
         
         /**
          * Removes outliers in a laser scan.

@@ -2,6 +2,9 @@
 
 #include "Task.hpp"
 
+#include <envire/maps/MLSGrid.hpp>
+#include <envire/operators/MLSProjection.hpp>
+
 using namespace accumulated_pointcloud;
 
 Task::Task(std::string const& name)
@@ -122,9 +125,24 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     // update visualization of mls grid or pointcloud
     if(_show_mls_grid)
     {
-        if(!mls_grid)
-            setupMLSGrid();
-        projection->updateAll();
+        if(projections.empty())
+        {
+            double grid_count_x = _grid_size_x / _cell_resolution_x;
+            double grid_count_y = _grid_size_y / _cell_resolution_y;
+
+            EnvireProjection projection(envire_pointcloud.get(), 
+                        new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y), 
+                        new envire::MLSProjection());
+            projections.push_back(projection);
+            setupProjection(laser2world * Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitY())), projection);
+
+        }
+        for(std::vector<EnvireProjection>::iterator it = projections.begin(); it != projections.end(); it++)
+        {
+            it->op->updateAll();
+            env.itemModified(it->target_map);
+        }
+            
     }
     else
         env.itemModified(envire_pointcloud.get());
@@ -140,20 +158,15 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     }
 }
 
-void Task::setupMLSGrid()
+void Task::setupProjection(const Eigen::Affine3d& transform, EnvireProjection &projection)
 {
-    double grid_count_x = _grid_size_x / _cell_resolution_x;
-    double grid_count_y = _grid_size_y / _cell_resolution_y;
-    
-    if(mls_grid)
-        mls_grid->detach();
-    if(projection)
-        projection->detach();
-    projection = boost::shared_ptr<envire::MLSProjection>(new envire::MLSProjection());
-    mls_grid = boost::shared_ptr<envire::MultiLevelSurfaceGrid>(new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y));
-    env.attachItem(mls_grid.get());
-    env.addInput(projection.get(), envire_pointcloud.get());
-    env.addOutput(projection.get(), mls_grid.get());
+    env.attachItem(projection.target_map);
+    envire::FrameNode *fn = new envire::FrameNode(transform);
+    env.getRootNode()->addChild(fn);
+    projection.target_map->setFrameNode(fn);
+
+    env.addInput(projection.op, projection.source_pointcloud);
+    env.addOutput(projection.op, projection.target_map);
 }
 
 /// The following lines are template definitions for the various state machine
