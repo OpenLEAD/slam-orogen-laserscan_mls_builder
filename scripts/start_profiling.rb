@@ -3,6 +3,9 @@ require 'ping'
 require "transformer/runtime"
 require 'orocos'
 
+include Orocos
+Orocos::CORBA.max_message_size = 80000000
+
 log = if ARGV[0]
           require 'orocos/log'
           log = Orocos::Log::Replay.open(ARGV)
@@ -13,7 +16,6 @@ log = if ARGV[0]
           nil
       end
 
-include Orocos
 Orocos.initialize
 
 ## load transformer config
@@ -54,9 +56,19 @@ if log
         view3d = Vizkit.vizkit3d_widget
         view3d.show()
         envireviz = Vizkit.default_loader.EnvireVisualization
+        bodystateviz = Vizkit.default_loader.RigidBodyStateVisualization
         Vizkit.connect_port_to 'accumulated_pointcloud', 'envire_data', :pull => false, :update_frequency => 33 do |sample, name|
             envireviz.updateBinaryEvents(sample)
-        end 
+        end
+
+        log.uw_portal.rigid_body_state.filter do |sample|
+            sample.sourceFrame = "world"
+            sample.targetFrame = "mounting"
+            sample2 = sample.clone
+            sample2.position = -sample.position
+            bodystateviz.updateRigidBodyState(sample2)
+            sample
+        end
 
         Vizkit.display accumulated_pointcloud
 
@@ -101,6 +113,8 @@ elsif Ping.pingecho("192.168.128.12",0.5)
             ## setup uw portal driver
             portal = Orocos::TaskContext.get "uw_portal"
             portal.server_name = "192.168.128.12"
+            protal.source_frame_name = "world"
+            protal.target_frame_name = "mounting"
 
             ## setup accumulated pointcloud task
             accumulated_pointcloud = TaskContext.get 'accumulated_pointcloud'
