@@ -12,6 +12,15 @@ using namespace accumulated_pointcloud;
 Task::Task(std::string const& name)
     : TaskBase(name)
 {
+    // transformation if using one surface
+    std::vector<Eigen::Affine3d> vec;
+    vec.push_back(Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitY())));
+    surface_transformations.push_back(vec);
+    // transformations if using two surfaces
+    std::vector<Eigen::Affine3d> vec2;
+    vec2.push_back(Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitX())));
+    vec2.push_back(Eigen::Affine3d(Eigen::AngleAxisd(0.5*M_PI,Eigen::Vector3d::UnitX())));
+    surface_transformations.push_back(vec2);
 }
 
 Task::Task(std::string const& name, RTT::ExecutionEngine* engine)
@@ -116,13 +125,40 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     std::vector<Eigen::Vector3d> points;
     filtered_scan.convertScanToPointCloud(points, laser2world, true);
     
-    // copy new points to the envire pointcloud
-    std::copy( points.begin(), points.end(), std::back_inserter( envire_pointcloud->vertices ) );
+    unsigned surface_count = _surface_count;
+    if(surface_count > MAX_COUNT_SURFACES)
+        surface_count = MAX_COUNT_SURFACES;
+    else if(surface_count <= 0)
+        surface_count = 1;
+    if(surface_count == 1)
+    {
+        // copy new points to the envire pointcloud
+        std::copy( points.begin(), points.end(), std::back_inserter( envire_pointcloud[0].vertices ) );
+    }
+    else
+    {
+        //TODO: make this more generic
+        // divide the point cloud at the current height of the sensor
+        Eigen::Vector3d sensor_pos(0,0,0);
+        sensor_pos = laser2world * sensor_pos;
+        std::vector<Eigen::Vector3d>::iterator it = points.begin();
+        do
+        {
+            it++;
+        }
+        while(it != points.end() && it->z() <= sensor_pos.z());
+        // copy new points to the envire pointcloud
+        std::copy( points.begin(), it, std::back_inserter( envire_pointcloud[0].vertices ) );
+        std::copy( it, points.end(), std::back_inserter( envire_pointcloud[1].vertices ) );
+    }
     
     // create uncertainty information
-    std::vector<double>& uncertainty(envire_pointcloud->getVertexData<double>(envire::Pointcloud::VERTEX_VARIANCE));
-    for(unsigned i = 0; i < points.size(); i++)
-        uncertainty.push_back(_sensor_uncertainty.get());
+    for(unsigned i = 0; i < surface_count; i++)
+    {
+        std::vector<double>& uncertainty(envire_pointcloud[i].getVertexData<double>(envire::Pointcloud::VERTEX_VARIANCE));
+        while(uncertainty.size() < envire_pointcloud[i].vertices.size())
+            uncertainty.push_back(_sensor_uncertainty.get());
+    }
     
     // update visualization of mls grid or pointcloud
     if(_show_mls_grid || _show_elevation_grid)
@@ -133,19 +169,26 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
             double grid_count_y = _grid_size_y / _cell_resolution_y;
             if(_show_mls_grid)
             {
-                EnvireProjection projection(envire_pointcloud.get(),
-                            new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y),
-                            new envire::MLSProjection());
-                projections.push_back(projection);
-                setupProjection(laser2world * Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitY())), projection);
+                for(unsigned i = 0; i < surface_count; i++)
+                {
+                    EnvireProjection projection(&envire_pointcloud[i],
+                                new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y),
+                                new envire::MLSProjection());
+                    projections.push_back(projection);
+                    setupProjection(laser2world * surface_transformations[surface_count-1][i], projection);
+                }
             }
             else
             {
-                EnvireProjection projection(envire_pointcloud.get(),
-                                            new envire::ElevationGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y),
-                                            new envire::Projection());
-                projections.push_back(projection);
-                setupProjection(laser2world * Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitY())), projection);
+                for(unsigned i = 0; i < surface_count; i++)
+                {
+                    EnvireProjection projection(&envire_pointcloud[i],
+                                                new envire::ElevationGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y),
+                                                new envire::Projection());
+                    projections.push_back(projection);
+                    
+                    setupProjection(laser2world * surface_transformations[surface_count-1][i], projection);
+                }
             }
         }
         for(std::vector<EnvireProjection>::iterator it = projections.begin(); it != projections.end(); it++)
@@ -156,7 +199,8 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
             
     }
     else
-        env.itemModified(envire_pointcloud.get());
+        for(unsigned i = 0; i < MAX_COUNT_SURFACES; i++)
+            env.itemModified(&envire_pointcloud[i]);
     
     // write out point cloud area of interest
     if(_point_cloud.connected())
@@ -164,7 +208,8 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
         //TODO
         base::samples::Pointcloud point_cloud;
         point_cloud.time = base::Time::now();
-        std::copy( envire_pointcloud->vertices.begin(), envire_pointcloud->vertices.end(), std::back_inserter( point_cloud.points ) );
+        for(unsigned i = 0; i < surface_count; i++)
+            std::copy( envire_pointcloud[i].vertices.begin(), envire_pointcloud[i].vertices.end(), std::back_inserter( point_cloud.points ) );
         _point_cloud.write(point_cloud);
     }
 }
@@ -196,8 +241,8 @@ bool Task::startHook()
     if (! TaskBase::startHook())
         return false;
     
-    envire_pointcloud = boost::shared_ptr<envire::Pointcloud>(new envire::Pointcloud());
-    env.attachItem(envire_pointcloud.get());
+    for(unsigned i = 0; i < MAX_COUNT_SURFACES; i++)
+        env.attachItem(&envire_pointcloud[i]);
     
     orocosEmitter = NULL;
     

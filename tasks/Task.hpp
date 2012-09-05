@@ -9,6 +9,8 @@
 #include <envire/maps/Pointcloud.hpp>
 #include <envire/Orocos.hpp>
 
+#define MAX_COUNT_SURFACES 2
+
 namespace accumulated_pointcloud {
 
     struct EnvireProjection
@@ -40,10 +42,12 @@ namespace accumulated_pointcloud {
 	friend class TaskBase;
     protected:
         envire::Environment env;
-        boost::shared_ptr<envire::Pointcloud> envire_pointcloud;
+        envire::Pointcloud envire_pointcloud[MAX_COUNT_SURFACES];
         std::vector<EnvireProjection> projections;
         envire::OrocosEmitter* orocosEmitter;
         base::Time lastEnvireDataUpdate;
+        
+        std::vector< std::vector<Eigen::Affine3d> > surface_transformations;
 
         
     protected:

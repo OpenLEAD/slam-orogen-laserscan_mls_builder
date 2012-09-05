@@ -44,6 +44,8 @@ if log
         accumulated_pointcloud.filter_laserscan = true
         # filter: bounding box of the sensor in meter
         accumulated_pointcloud.sensor_bounding_box = 0.2
+        # surfaces that are used to display the data
+        accumulated_pointcloud.surface_count = 2
 
         ## connect ports
         log.profiling.profiling_scan.connect_to accumulated_pointcloud.laserscan, :type => :buffer, :size => 100

@@ -32,6 +32,8 @@ task_context "Task" do
         doc 'true if laser scan should be filtered'
     property('sensor_bounding_box', 'double', 0.5).
         doc 'filter: bounding box of the sensor in meter'
+    property('surface_count', 'int', 1).
+        doc 'surfaces that are used to display the data'
 
     input_port("laserscan", "base::samples::LaserScan").
         needs_reliable_connection.
