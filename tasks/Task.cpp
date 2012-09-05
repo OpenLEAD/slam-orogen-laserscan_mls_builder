@@ -107,6 +107,20 @@ void Task::filterLaserScan(unsigned int window_size, base::samples::LaserScan& s
         scan.ranges[delete_index[i]] = base::samples::MEASUREMENT_ERROR;
 }
 
+void Task::dividePointcloudByPlane(const std::vector<Eigen::Vector3d> &source_pointcloud, const Eigen::Hyperplane<double, 3> &plane, 
+                                      std::vector<Eigen::Vector3d> &sub_pointcloud_1, std::vector<Eigen::Vector3d> &sub_pointcloud_2)
+{
+    sub_pointcloud_1.clear();
+    sub_pointcloud_2.clear();
+    for(std::vector<Eigen::Vector3d>::const_iterator it = source_pointcloud.begin(); it != source_pointcloud.end(); it++)
+    {
+        if(plane.signedDistance(*it) < 0.0)
+            sub_pointcloud_1.push_back(*it);
+        else
+            sub_pointcloud_2.push_back(*it);
+    }
+}
+
 void Task::laserscanTransformerCallback(base::Time const& timestamp, base::samples::LaserScan const& sample)
 {
     Eigen::Affine3d laser2world;
@@ -137,19 +151,15 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     }
     else
     {
-        //TODO: make this more generic
         // divide the point cloud at the current height of the sensor
         Eigen::Vector3d sensor_pos(0,0,0);
         sensor_pos = laser2world * sensor_pos;
-        std::vector<Eigen::Vector3d>::iterator it = points.begin();
-        do
-        {
-            it++;
-        }
-        while(it != points.end() && it->z() <= sensor_pos.z());
-        // copy new points to the envire pointcloud
-        std::copy( points.begin(), it, std::back_inserter( envire_pointcloud[0].vertices ) );
-        std::copy( it, points.end(), std::back_inserter( envire_pointcloud[1].vertices ) );
+        Eigen::Hyperplane<double, 3> plane(Eigen::Vector3d(0,0,1), sensor_pos);
+        std::vector<Eigen::Vector3d> sub_points_1, sub_points_2;
+        
+        dividePointcloudByPlane(points, plane, sub_points_1, sub_points_2);
+        std::copy( sub_points_1.begin(), sub_points_1.end(), std::back_inserter( envire_pointcloud[0].vertices ) );
+        std::copy( sub_points_2.begin(), sub_points_2.end(), std::back_inserter( envire_pointcloud[1].vertices ) );
     }
     
     // create uncertainty information

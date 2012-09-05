@@ -52,6 +52,8 @@ namespace accumulated_pointcloud {
         
     protected:
         void setupProjection(const Eigen::Affine3d &transform, EnvireProjection &projection);
+        void dividePointcloudByPlane(const std::vector<Eigen::Vector3d> &source_pointcloud, const Eigen::Hyperplane<double, 3> &plane, 
+                                      std::vector<Eigen::Vector3d> &sub_pointcloud_1, std::vector<Eigen::Vector3d> &sub_pointcloud_2);
         
         /**
          * Removes outliers in a laser scan.
