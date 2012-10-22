@@ -49,6 +49,9 @@ namespace accumulated_pointcloud {
         
         std::vector< std::vector<Eigen::Affine3d> > surface_transformations;
 
+        double stop_log_height;
+        double stop_log_length;
+        double stop_log_depth;
         
     protected:
         void setupProjection(const Eigen::Affine3d &transform, EnvireProjection &projection);

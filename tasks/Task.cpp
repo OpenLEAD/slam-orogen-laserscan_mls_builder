@@ -21,6 +21,10 @@ Task::Task(std::string const& name)
     vec2.push_back(Eigen::Affine3d(Eigen::AngleAxisd(-0.5*M_PI,Eigen::Vector3d::UnitX())));
     vec2.push_back(Eigen::Affine3d(Eigen::AngleAxisd(0.5*M_PI,Eigen::Vector3d::UnitX())));
     surface_transformations.push_back(vec2);
+    
+    stop_log_depth = 1.007;
+    stop_log_height = 0.674;
+    stop_log_length = 8.0;
 }
 
 Task::Task(std::string const& name, RTT::ExecutionEngine* engine)
@@ -138,6 +142,25 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     // compute pointcloud
     std::vector<Eigen::Vector3d> points;
     filtered_scan.convertScanToPointCloud(points, laser2world, true);
+    
+    // remove points outside of the stop log boundaries
+    if(_use_stop_log && _surface_distance != 0.0)
+    {
+        double stop_log_size_variance = 0.1;
+        Eigen::Vector3d varance(stop_log_size_variance,stop_log_size_variance,stop_log_size_variance);
+        Eigen::AlignedBox<double,3> box;
+        Eigen::Vector3d first_corner(_surface_distance - stop_log_depth, -stop_log_height * 0.5, -stop_log_length * 0.5);
+        Eigen::Vector3d second_corner(_surface_distance, stop_log_height * 0.5, stop_log_length * 0.5);
+        box.extend(laser2world * (first_corner - varance));
+        box.extend(laser2world * (second_corner + varance));
+        for(std::vector<Eigen::Vector3d>::iterator it = points.begin(); it != points.end();)
+        {
+            if(box.contains(*it))
+                it++;
+            else
+                it = points.erase(it);
+        }
+    }
     
     unsigned surface_count = _surface_count;
     if(surface_count > MAX_COUNT_SURFACES)

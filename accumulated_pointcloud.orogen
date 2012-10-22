@@ -34,6 +34,10 @@ task_context "Task" do
         doc 'filter: bounding box of the sensor in meter'
     property('surface_count', 'int', 1).
         doc 'surfaces that are used to display the data'
+    property('surface_distance', 'double', 0.0).
+        doc 'known distance to the surface to scan, zero means distance is unknown'
+    property('use_stop_log', 'bool', false).
+        doc ''
 
     input_port("laserscan", "base::samples::LaserScan").
         needs_reliable_connection.
