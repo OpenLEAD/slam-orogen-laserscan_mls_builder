@@ -1,9 +1,9 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.hpp */
 
-#ifndef ACCUMULATED_POINTCLOUD_TASK_TASK_HPP
-#define ACCUMULATED_POINTCLOUD_TASK_TASK_HPP
+#ifndef laserscan_mls_builder_TASK_TASK_HPP
+#define laserscan_mls_builder_TASK_TASK_HPP
 
-#include "accumulated_pointcloud/TaskBase.hpp"
+#include "laserscan_mls_builder/TaskBase.hpp"
 #include <boost/shared_ptr.hpp>
 #include <envire/Core.hpp>
 #include <envire/maps/Pointcloud.hpp>
@@ -11,7 +11,7 @@
 
 #define MAX_COUNT_SURFACES 2
 
-namespace accumulated_pointcloud {
+namespace laserscan_mls_builder {
 
     struct EnvireProjection
     {
@@ -32,7 +32,7 @@ namespace accumulated_pointcloud {
      * The name of a TaskContext is primarily defined via:
      \verbatim
      deployment 'deployment_name'
-         task('custom_task_name','accumulated_pointcloud::Task')
+         task('custom_task_name','laserscan_mls_builder::Task')
      end
      \endverbatim
      *  It can be dynamically adapted when the deployment is called with a prefix argument. 
@@ -73,7 +73,7 @@ namespace accumulated_pointcloud {
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
          * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
          */
-        Task(std::string const& name = "accumulated_pointcloud::Task");
+        Task(std::string const& name = "laserscan_mls_builder::Task");
 
         /** TaskContext constructor for Task 
          * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices. 

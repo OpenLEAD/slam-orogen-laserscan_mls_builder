@@ -1,4 +1,4 @@
-name "accumulated_pointcloud"
+name "laserscan_mls_builder"
 version "0.1"
 
 using_library 'envire'
@@ -17,7 +17,7 @@ task_context "Task" do
     property('show_mls_grid', 'bool', false).
         doc 'show a mls grid instead of a pointcloud'
     property('show_elevation_grid', 'bool', false).
-        doc 'show a mls grid instead of a pointcloud'
+        doc 'show an elevation grid instead of a pointcloud'
     property('grid_size_x', 'double', 10.0).
         doc 'x size of the grid in meter'
     property('grid_size_y', 'double', 10.0).
@@ -57,12 +57,5 @@ task_context "Task" do
     end
 
     port_driven "laserscan"
-end
-
-deployment "accumulated_pointcloud_test" do
-    # This is a test deployment that should not be installed
-    do_not_install
-
-    task("accumulated_pointcloud", "Task")
 end
 

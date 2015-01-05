@@ -7,7 +7,7 @@
 #include <envire/maps/Grids.hpp>
 #include <envire/operators/Projection.hpp>
 
-using namespace accumulated_pointcloud;
+using namespace laserscan_mls_builder;
 
 Task::Task(std::string const& name)
     : TaskBase(name)
