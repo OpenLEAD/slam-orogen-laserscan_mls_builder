@@ -251,10 +251,13 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
                 }
             }
         }
-        for(std::vector<EnvireProjection>::iterator it = projections.begin(); it != projections.end(); it++)
+        if (_envire_data.connected())
         {
-            it->op->updateAll();
-            env.itemModified(it->target_map);
+            for(std::vector<EnvireProjection>::iterator it = projections.begin(); it != projections.end(); it++)
+            {
+                it->op->updateAll();
+                env.itemModified(it->target_map);
+            }
         }
             
     }
@@ -347,7 +350,23 @@ void Task::stopHook()
     TaskBase::stopHook();
     
     if(_envire_path.get() != "")
+    {
+        if(_show_mls_grid || _show_elevation_grid)
+        {
+            for(std::vector<EnvireProjection>::iterator it = projections.begin(); it != projections.end(); it++)
+            {
+                it->op->updateAll();
+                env.itemModified(it->target_map);
+            }
+        }
+        else
+        {
+            for(unsigned i = 0; i < MAX_COUNT_SURFACES; i++)
+                env.itemModified(&envire_pointcloud[i]);
+        }
+
         env.serialize(_envire_path);
+    }
     
     delete orocosEmitter;
     orocosEmitter = NULL;
