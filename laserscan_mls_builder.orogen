@@ -5,6 +5,7 @@ using_library 'envire'
 
 import_types_from "base"
 import_types_from 'envire'
+import_types_from "laserscan_mls_builderTypes.hpp"
 
 task_context "Task" do
 
@@ -38,6 +39,10 @@ task_context "Task" do
         doc 'known distance to the surface to scan, zero means distance is unknown'
     property('use_stop_log', 'bool', false).
         doc ''
+    # Set of bounding boxes that should be excluded from the final map
+    #
+    # They are expressed in the world frame
+    property 'excluded_bounding_boxes', '/std/vector</laserscan_mls_builder/Box>'
 
     input_port("laserscan", "base::samples::LaserScan").
         needs_reliable_connection.

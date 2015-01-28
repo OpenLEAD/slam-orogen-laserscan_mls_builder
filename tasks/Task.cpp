@@ -6,6 +6,7 @@
 #include <envire/operators/MLSProjection.hpp>
 #include <envire/maps/Grids.hpp>
 #include <envire/operators/Projection.hpp>
+#include <laserscan_mls_builder/laserscan_mls_builderTypes.hpp>
 
 using namespace laserscan_mls_builder;
 
@@ -146,9 +147,29 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
         filterLaserScan(sample.ranges.size() / 10, filtered_scan, 0.05, 0.7);
     
     // compute pointcloud
+    std::vector<Eigen::Vector3d> raw_points;
+    filtered_scan.convertScanToPointCloud(raw_points, laser2world, true);
+
+    // Filter out the provided bounding box
+    std::vector<Box> boxes = _excluded_bounding_boxes.get();
     std::vector<Eigen::Vector3d> points;
-    filtered_scan.convertScanToPointCloud(points, laser2world, true);
-    
+    if (boxes.empty())
+        points = raw_points;
+    else
+    {
+        for (unsigned int j = 0; j < raw_points.size(); ++j)
+        {
+            unsigned int i;
+            for (i = 0; i < boxes.size(); ++i)
+            {
+                if (boxes[i].include(raw_points[j]))
+                    break;
+            }
+            if (i == boxes.size())
+                points.push_back(raw_points[j]);
+        }
+    }
+
     // remove points outside of the stop log boundaries
     if(_use_stop_log && _surface_distance != 0.0)
     {
