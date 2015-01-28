@@ -137,7 +137,8 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
     // filter laserscan
     base::samples::LaserScan filtered_scan = sample;
     filtered_scan.minRange = _sensor_bounding_box * 1000;
-    filterLaserScan(sample.ranges.size() / 10, filtered_scan, 0.05, 0.7);
+    if (_filter_laserscan.get())
+        filterLaserScan(sample.ranges.size() / 10, filtered_scan, 0.05, 0.7);
     
     // compute pointcloud
     std::vector<Eigen::Vector3d> points;
