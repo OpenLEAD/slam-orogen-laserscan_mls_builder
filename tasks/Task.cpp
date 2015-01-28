@@ -235,7 +235,7 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
                                 new envire::MultiLevelSurfaceGrid(grid_count_y, grid_count_x, _cell_resolution_x, _cell_resolution_y, -0.5 * _grid_size_x, -0.5 * _grid_size_y),
                                 new envire::MLSProjection());
                     projections.push_back(projection);
-                    setupProjection(laser2world * surface_transformations[surface_count-1][i], projection);
+                    setupProjection(laser2world, projection);
                 }
             }
             else
@@ -247,7 +247,7 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
                                                 new envire::Projection());
                     projections.push_back(projection);
                     
-                    setupProjection(laser2world * surface_transformations[surface_count-1][i], projection);
+                    setupProjection(laser2world, projection);
                 }
             }
         }
@@ -277,9 +277,7 @@ void Task::laserscanTransformerCallback(base::Time const& timestamp, base::sampl
 void Task::setupProjection(const Eigen::Affine3d& transform, EnvireProjection &projection)
 {
     env.attachItem(projection.target_map);
-    envire::FrameNode *fn = new envire::FrameNode(transform);
-    env.getRootNode()->addChild(fn);
-    projection.target_map->setFrameNode(fn);
+    projection.target_map->setFrameNode(env.getRootNode());
 
     env.addInput(projection.op, projection.source_pointcloud);
     env.addOutput(projection.op, projection.target_map);
